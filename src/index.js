@@ -1,6 +1,6 @@
 import { createElement as h, render } from "./vDOM";
 import renderDOM from "./renderDOM";
-import { patch } from "./patch";
+import { patch } from "./domDiff";
 import doPatch from "./doPatch";
 
 const vDom = h(
@@ -65,23 +65,17 @@ const vDomChange = h(
       },
       [h("i", {}, "b => i")]
     ),
-    h(
-      "li",
-      {
-        className: "list-item last",
-        style: "color: blue",
-      },
-      "last item"
-    ),
   ]
 );
 
-const patchs = patch(vDom, vDomChange);
+const patches = patch(vDom, vDomChange);
+
+console.log(patches);
 
 window.onload = function () {
   let $btn = document.getElementById("btn");
 
   $btn.addEventListener("click", () => {
-    doPatch(realDOM, patchs);
+    doPatch(realDOM, patches);
   });
 };

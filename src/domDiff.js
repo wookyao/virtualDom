@@ -1,53 +1,51 @@
-import Element from "./Element.class";
-import { ATTR, TEXT, REMOVE, REPLACE, NEWNODE } from "./patchTypes";
+import { ATTR, TEXT, REMOVE, REPLACE } from "./patchTypes";
 
-let patchs = {},
+let patches = {},
   nodeIndex = 0;
 
 function patch(oldNode, newNode) {
-  patchs = {};
+  patches = {};
   nodeIndex = 0;
   let index = 0;
-  return vNodeWalk(oldNode, newNode, index);
+  vNodeWalk(oldNode, newNode, index);
+  return patches;
 }
 
 function vNodeWalk(oldNode, newNode, index) {
   const { tagName, attrs, children } = oldNode;
+  let arrPatches = [];
   if (!newNode) {
-    patchs[index] = {
+    arrPatches.push({
       type: REMOVE,
       index,
-    };
-  } else if (!oldNode) {
-    patchs[index] = {
-      type: NEWNODE,
-      newNode,
-    };
+    });
   } else if (typeof oldNode === "string" && typeof newNode === "string") {
     if (oldNode !== newNode) {
-      patchs[index] = {
+      arrPatches.push({
         type: TEXT,
         text: newNode,
-      };
+      });
     }
   } else if (tagName === newNode.tagName) {
     const props = attrsWalk(attrs, newNode.attrs);
     if (Object.keys(props).length) {
-      patchs[index] = {
+      arrPatches.push({
         type: ATTR,
         attrs: props,
-      };
+      });
     }
 
     childrenWalk(children, newNode.children);
   } else {
-    patchs[index] = {
+    arrPatches.push({
       type: REPLACE,
       newNode,
-    };
+    });
   }
 
-  return patchs;
+  if (arrPatches.length) {
+    patches[index] = arrPatches;
+  }
 }
 
 function attrsWalk(attrs, targetAttrs) {
